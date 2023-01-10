@@ -36,3 +36,35 @@
     transform: rotate(360deg);
   }
 }
+.basic{
+  display: grid;
+  grid-template-rows: 4em 4fr 1fr;
+  background-color: gray;
+}
+
+
+header{
+  background-color: lightblue;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 10fr 1fr;
+}
+#user{
+
+  grid-column: -1;
+  margin: auto;
+}
+
+main{
+  background-color: white;
+}
+footer{
+  
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 15fr;
+}
+.footeritems{
+  
+  align-content: center;
+  margin: auto;
+}
+
