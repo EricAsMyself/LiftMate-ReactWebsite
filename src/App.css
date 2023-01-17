@@ -1,5 +1,10 @@
 .App {
   text-align: center;
+  /* background-color: #F1FAEE; */
+  background-image: url('assests/background.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 100%;
 }
 
 .App-logo {
@@ -24,6 +29,19 @@
   color: white;
 }
 
+.foodlayout{
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+}
+.meal{
+  opacity: 0.8;
+  background-color: #2E7376;
+  margin: 3em;
+  border-radius: 1em;
+}
+.date{
+  margin: auto;
+}
 .App-link {
   color: #61dafb;
 }
@@ -44,23 +62,27 @@
 
 
 header{
-  background-color: lightblue;
+  background-color: #1D3557;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 10fr 1fr;
+  grid-template-columns: 1fr 1fr  10fr 1fr 1fr;
 }
-#user{
 
+#user{
   grid-column: -1;
   margin: auto;
 }
-
-main{
-  background-color: white;
+.today{
+  background-color: #282c34;
 }
-footer{
-  
+.main{
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 15fr;
+  grid-template-columns: 1fr 10fr 1fr;
+}
+
+footer{
+  height: 10em;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 10fr;
 }
 .footeritems{
   
@@ -68,3 +90,24 @@ footer{
   margin: auto;
 }
 
+
+.left{
+  grid-column: 1;
+  background-color: #457B9D;
+}
+
+.hoverButton{
+  border-top: 2px solid gray;
+  border-bottom: 2px solid gray;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background-color: #F4A4AB;
+}
+.menuItem{
+  width: 100%;
+  border-top: 2px solid gray;
+  border-bottom: 2px solid gray;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background-color: lightcoral;
+}
