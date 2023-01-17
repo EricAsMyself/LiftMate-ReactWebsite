@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 // import 'dotenv/config';
 import logo from "./assests/logo.png";
 import login from "./assests/login.png"
@@ -13,8 +13,9 @@ import 'firebase/compat/firestore';
 
 import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
+import { addDoc, collection, getDocs, getFirestore } from 'firebase/firestore';
 
-firebase.initializeApp({
+const firebaseConfig = {
   apiKey: "AIzaSyDiXBReqBDwadcBvwaCQ8_M0GDYt3nPRe0",
 
   authDomain: "lift-mate.firebaseapp.com",
@@ -29,9 +30,18 @@ firebase.initializeApp({
 
   measurementId: "G-LP4ZMDTJB9"
 
-})
+}
 
 const API_KEY = 'zaBw11gYNv77O6IdJXk8V4vaVEwCGSN9sZm9i7NG';
+
+
+const app = firebase.initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+
+
+
 
 
   async function getCalories(foodName){
@@ -139,6 +149,11 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
     let {cal, foodName} = await getCalories(foodToAdd);
     addFunction({ id: 2, name: foodName, cal: cal, amount: '11'})
   }
+
+  const foodsCollectionRef = collection(db, "food")
+  const createFoods = async (addedFood) => {
+    await addDoc(foodsCollectionRef, addedFood)
+  }
   
   const [inputValueBrek, setInputValueBrek] = useState("");
   const [inputValueLun, setInputValueLun] = useState("");
@@ -148,7 +163,7 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
 
   return(
     <div>
-      <button className='menuItem' onClick={() => handleFood(addBreakfast, inputValueBrek)}>Breakfast</button>
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueBrek)}>Breakfast</button>
                 <input type="text" value={inputValueBrek} 
                 onChange={event => setInputValueBrek(event.target.value)}/>
 
@@ -180,6 +195,20 @@ function App() {
   const [foodsDin, setFoodsDin] = useState(intitialFoodsDin);
   const [foodsSnack, setFoodsSnack] = useState(intitialFoodsSnack);
 
+  const [foods, setFoods] = useState([]);
+  const foodsCollectionRef = collection(db, "food")
+  useEffect (() => {
+    const getFoods = async () => {
+      const data = await getDocs(foodsCollectionRef)
+      setFoods(data.docs.map((doc) => ({...doc.data(), id: doc.id})))
+    }
+    getFoods()
+  }, [])
+
+  const createFoods = async () => {
+    await addDoc(foodsCollectionRef, {name: "randy", cal: 100, amount: 3})
+  }
+
 
 
   return (
@@ -202,7 +231,7 @@ function App() {
       foodListSnack={foodsSnack} foodSetSnack={setFoodsSnack}/> : <div></div>}
       </div>
       <div >
-        <Meal  meal="Breakfast" food_list={foodsBrek} />
+        <Meal  meal="Breakfast" food_list={foods} />
         <Meal meal="Lunch" food_list={foodsLun}/>
         <Meal meal="Dinner" food_list={foodsDin}/>
         <Meal meal="Snacks" food_list={foodsSnack}/>
