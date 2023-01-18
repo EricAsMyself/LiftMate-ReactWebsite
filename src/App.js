@@ -13,7 +13,7 @@ import 'firebase/compat/firestore';
 
 import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { addDoc, collection, getDocs, getFirestore } from 'firebase/firestore';
+import { addDoc, collection, getDocs, getFirestore, doc, deleteDoc, getDoc} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDiXBReqBDwadcBvwaCQ8_M0GDYt3nPRe0",
@@ -34,15 +34,8 @@ const firebaseConfig = {
 
 const API_KEY = 'zaBw11gYNv77O6IdJXk8V4vaVEwCGSN9sZm9i7NG';
 
-
 const app = firebase.initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-
-
-
-
-
 
   async function getCalories(foodName){
     try {
@@ -51,19 +44,19 @@ const db = getFirestore(app);
       return {
         cal: calories,
         foodName: foodName
-      };
+      }
     } catch (error) {
-      console.log(error);
+      return {
+        cal: 100,
+        foodName: "Error"
+      }
+      // console.log(error);
     }
   }
-
-  
-  // let {cal, foodName} = await getCalories('banana');
 
 
 const intitialFoodsBrek = [
   { id: 1, name: 'Name', cal: 'Calories' , amount: 'amount'},
-  // { id: 2, name: foodName, cal: cal, amount: '11'}
 ];
 const intitialFoodsLun = [
   { id: 1, name: 'Name', cal: 'Calories' , amount: 'amount'},
@@ -80,6 +73,10 @@ const intitialFoodsSnack = [
 const auth = firebase.auth();
 const firestore = firebase.firestore();
 
+
+
+
+
 function SignIn(){
   const signInWithGoogle = () => {
      const provider = new firebase.auth.GoogleAuthProvider();
@@ -90,22 +87,23 @@ function SignIn(){
   )
 }
 
-function ChatRoom(){
 
-  return(
-    <p>you are logged in </p>
-  )
-}
 
 function SignInFun(){
   // const [user, loading, error] = useAuthState(auth);
-  
+
   return(
     <SignIn />
   )
 }
 
-function Food({food_list}) {
+function Food({food_list, meals}) {
+
+  const deletFood = async (id) => {
+    const foodDoc = doc(db, meals, id) ;
+    await deleteDoc(foodDoc) ;
+  }
+  
   return(
     <div >
     {food_list.map((food) => (
@@ -113,6 +111,7 @@ function Food({food_list}) {
         <p >{food.cal}</p>
         <p>{food.name}</p>
         <p>{food.amount}</p>
+          <button onClick={() =>{deletFood(food.id)}}>delete</button>
       </div>
     ))}
   </div>
@@ -123,7 +122,12 @@ function Meal(props) {
   return(
     <div className='meal'>
       <h1>{props.meal}</h1>
-  <Food food_list={props.food_list} />
+      <div className='foodlayout'>
+        <p>calories</p>
+        <p>name</p>
+        <p>amount</p>
+      </div>
+  <Food food_list={props.food_list} meals={props.meals} />
   {/* <Food /> */}
   </div>
 )}
@@ -145,13 +149,14 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
     foodSetSnack([ ...foodListSnack,  addedFood]);
   };
 
-  async function handleFood(addFunction,foodToAdd) {
+  async function handleFood(addFunction,foodToAdd, meal) {
     let {cal, foodName} = await getCalories(foodToAdd);
-    addFunction({ id: 2, name: foodName, cal: cal, amount: '11'})
+    addFunction({ id: 2, name: foodName, cal: cal, amount: '1'}, meal)
   }
 
-  const foodsCollectionRef = collection(db, "food")
-  const createFoods = async (addedFood) => {
+  
+  const createFoods = async (addedFood, meal) => {
+    const foodsCollectionRef = collection(db, meal)
     await addDoc(foodsCollectionRef, addedFood)
   }
   
@@ -163,19 +168,19 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
 
   return(
     <div>
-      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueBrek)}>Breakfast</button>
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueBrek, "brek")}>Breakfast</button>
                 <input type="text" value={inputValueBrek} 
                 onChange={event => setInputValueBrek(event.target.value)}/>
 
-      <button className='menuItem' onClick={() => handleFood(addLunch, inputValueLun)}>Lunch</button>
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueLun, "lun")}>Lunch</button>
       <input type="text" value={inputValueLun} 
                 onChange={event => setInputValueLun(event.target.value)}/>
 
-      <button className='menuItem' onClick={() => handleFood(addDinner, inputValueDin)}>Dinner</button>
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueDin, "din")}>Dinner</button>
       <input type="text" value={inputValueDin} 
                 onChange={event => setInputValueDin(event.target.value)}/>
 
-      <button className='menuItem' onClick={() => handleFood(addSnack, inputValueSnack)}>Snack</button>
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueSnack, "snack")}>Snack</button>
       <input type="text" value={inputValueSnack} 
                 onChange={event => setInputValueSnack(event.target.value)}/>
     </div>
@@ -185,6 +190,17 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
 
 
 function App() {
+  const [userId, setUserId] = useState(null);
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+        setUserId(user.uid);
+    } else {
+        setUserId(null);
+    }
+});
+
+console.log(userId)
+
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => {
     setOpen(!open);
@@ -195,19 +211,52 @@ function App() {
   const [foodsDin, setFoodsDin] = useState(intitialFoodsDin);
   const [foodsSnack, setFoodsSnack] = useState(intitialFoodsSnack);
 
-  const [foods, setFoods] = useState([]);
-  const foodsCollectionRef = collection(db, "food")
+  // const [foodsBrek, setFoodsBrek] = useStateBrek([]);
+  const foodsCollectionRefBrek = collection(db, "brek")
   useEffect (() => {
     const getFoods = async () => {
-      const data = await getDocs(foodsCollectionRef)
-      setFoods(data.docs.map((doc) => ({...doc.data(), id: doc.id})))
+      const data = await getDocs(foodsCollectionRefBrek)
+      setFoodsBrek(data.docs.map((doc) => ({...doc.data(), id: doc.id})))
     }
     getFoods()
   }, [])
 
-  const createFoods = async () => {
-    await addDoc(foodsCollectionRef, {name: "randy", cal: 100, amount: 3})
-  }
+  const foodsCollectionRefLun = collection(db, "lun")
+  useEffect (() => {
+    const getFoods = async () => {
+      const data = await getDocs(foodsCollectionRefLun)
+      setFoodsLun(data.docs.map((doc) => ({...doc.data(), id: doc.id})))
+    }
+    getFoods()
+  }, [])
+  const foodsCollectionRefDin = collection(db, "din")
+  useEffect (() => {
+    const getFoods = async () => {
+      const data = await getDocs(foodsCollectionRefDin)
+      setFoodsDin(data.docs.map((doc) => ({...doc.data(), id: doc.id})))
+    }
+    getFoods()
+  }, [])
+  const foodsCollectionRefSnack = collection(db, "snack")
+  useEffect (() => {
+    const getFoods = async () => {
+      const data = await getDocs(foodsCollectionRefSnack)
+      setFoodsSnack(data.docs.map((doc) => ({...doc.data(), id: doc.id})))
+    }
+    getFoods()
+  }, [])
+
+
+  // const docRef = doc(db, "food", "ucveXDjRCwRTetF0bU7xRya8V5x1")
+
+  // getDoc(docRef)
+  //   .then((doc) =>{
+  //     console.log(doc.data(), doc.id)
+  //   })
+
+
+
+
 
 
 
@@ -231,10 +280,10 @@ function App() {
       foodListSnack={foodsSnack} foodSetSnack={setFoodsSnack}/> : <div></div>}
       </div>
       <div >
-        <Meal  meal="Breakfast" food_list={foods} />
-        <Meal meal="Lunch" food_list={foodsLun}/>
-        <Meal meal="Dinner" food_list={foodsDin}/>
-        <Meal meal="Snacks" food_list={foodsSnack}/>
+        <Meal  meal="Breakfast" food_list={foodsBrek} meals="brek"/>
+        <Meal meal="Lunch" food_list={foodsLun} meals="lun"/>
+        <Meal meal="Dinner" food_list={foodsDin} meals="din"/>
+        <Meal meal="Snacks" food_list={foodsSnack} meals="snack"/>
       </div>
     </main>
 
