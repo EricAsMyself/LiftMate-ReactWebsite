@@ -1,12 +1,15 @@
 import './App.css';
 import React, { useState, useEffect  } from 'react';
-// import 'dotenv/config';
+// Here we import the proper pictures
 import logo from "./assests/logo.png";
 import login from "./assests/login.png"
 import githubLogo from "./assests/github.png"
 import linkedinLogo from "./assests/linkedin.png"
+
+// Import axios for better fetching
 import axios from 'axios'
 
+// Import Firebase for db, and authentication
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
@@ -17,6 +20,8 @@ import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 import { addDoc, collection, getDocs, getFirestore, doc, deleteDoc, getDoc} from 'firebase/firestore';
 
+
+// Keys for firestore, I need to remove
 const firebaseConfig = {
   apiKey: "AIzaSyDiXBReqBDwadcBvwaCQ8_M0GDYt3nPRe0",
 
@@ -34,20 +39,26 @@ const firebaseConfig = {
 
 }
 
+// Keys for USDA need to remove
 const API_KEY = 'zaBw11gYNv77O6IdJXk8V4vaVEwCGSN9sZm9i7NG';
 
+
+// Here we initialize firebase, and get the db from firestore
 const app = firebase.initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+
+// Here is where we call fetch to get the USDA calories
   async function getCalories(foodName){
     try {
       let response = await axios.get('https://api.nal.usda.gov/fdc/v1/foods/search?api_key='+API_KEY+'&query='+foodName);
-      let calories = response.data.foods[0].foodNutrients[3].value;
+      let calories = response.data.foods[0].foodNutrients[3].value; // Makes json readable
       return {
         cal: calories,
         foodName: foodName
       }
     } catch (error) {
+      // TODO remove this to console.log so that you don't see error, but something else.
       return {
         cal: 100,
         foodName: "Error"
@@ -57,6 +68,8 @@ const db = getFirestore(app);
   }
 
 
+
+// Initalize all of the different lists
 const intitialFoodsBrek = [
   { id: 0, name: 'Loading...', cal: 'Loading...' , amount: 'Loading...'},
 ];
@@ -72,6 +85,7 @@ const intitialFoodsSnack = [
 
 
 
+// Here is how we get the authentication for firebase
 const auth = firebase.auth();
 const firestore = firebase.firestore();
 
@@ -79,6 +93,7 @@ const firestore = firebase.firestore();
 
 
 
+// Sign in function will get the google authentication, and send it to the site.
 function SignIn(){
   const signInWithGoogle = () => {
      const provider = new firebase.auth.GoogleAuthProvider();
@@ -91,21 +106,27 @@ function SignIn(){
 
 
 
+
+// This calls the sign in funciton
 function SignInFun(){
-  // const [user, loading, error] = useAuthState(auth);
 
   return(
     <SignIn />
   )
 }
 
+
+// Here is where we actually start getting the food, and listing it out.
 function Food({food_list, meals}) {
 
+  // Lets you delete things from the database
+  // TODO add functionality to delete it from the use state too.
   const deletFood = async (id) => {
     const foodDoc = doc(db, meals, id) ;
     await deleteDoc(foodDoc) ;
   }
   
+  // Returns the food in a readable way, so that you can see it in the meal
   return(
     <div >
     {food_list.map((food) => (
@@ -120,6 +141,7 @@ function Food({food_list, meals}) {
   )
 }
 
+// Calls the food function, and shows each of the different meals, and basic frame work.
 function Meal(props) {
   return(
     <div className='meal'>
@@ -136,8 +158,10 @@ function Meal(props) {
 
 
 
+// This fucntion is the drop down menu.
 function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin, foodSetDin, foodListSnack, foodSetSnack}){
 
+  // Basic functions to add the food to each of the different use states.
   const addBreakfast = (addedFood) => {
     foodSetBrek([ ...foodListBrek,  addedFood]);
   };
@@ -151,18 +175,19 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
     foodSetSnack([ ...foodListSnack,  addedFood]);
   };
 
+  // This is the fucntion that everything calls, so that we can add to the db, and use state.
   async function handleFood(addFunction,foodToAdd, meal,secondFunction) {
-    let {cal, foodName} = await getCalories(foodToAdd);
+    let {cal, foodName} = await getCalories(foodToAdd); // This part goes out and gets the calories.
     addFunction({ id: 2, name: foodName, cal: cal, amount: '1'}, meal)
     secondFunction({ id: 2, name: foodName, cal: cal, amount: '1'})
   }
 
-  
+  // Here is where we actually add to the db, 
   const createFoods = async (addedFood, meal) => {
     const foodsCollectionRef = collection(db, meal)
     await addDoc(foodsCollectionRef, addedFood)
   }
-  
+  // Here we set the input values, so that the inputs, have something to give to the function above.
   const [inputValueBrek, setInputValueBrek] = useState("");
   const [inputValueLun, setInputValueLun] = useState("");
   const [inputValueDin, setInputValueDin] = useState("");
@@ -191,14 +216,16 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
 }
 
 
-
+// This is the main function that calls everything else.
 function App() {
+  // This goes into the head, and adds an image to the title page.
   const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
   link.type = 'image/ico';
   link.rel = 'shortcut icon';
   link.href = newIcon;
   document.getElementsByTagName('head')[0].appendChild(link);
 
+  // This is code so that you can show if someone is logged in or not. It will show the user id.
   const [userId, setUserId] = useState(null);
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
@@ -208,19 +235,21 @@ function App() {
     }
 });
 
-// console.log(userId)
-
+  // This is a simple use state and function to keep track of the menu, wheather open or not.
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => {
     setOpen(!open);
   };
 
+
+  // Here we intitailize the usestates, for the food containers.
   const [foodsBrek, setFoodsBrek] = useState(intitialFoodsBrek);
   const [foodsLun, setFoodsLun] = useState(intitialFoodsLun);
   const [foodsDin, setFoodsDin] = useState(intitialFoodsDin);
   const [foodsSnack, setFoodsSnack] = useState(intitialFoodsSnack);
 
-  // const [foodsBrek, setFoodsBrek] = useStateBrek([]);
+  // Here we initialize each different db of food, so that we can get updated, each time we start the
+  // Site.
   const foodsCollectionRefBrek = collection(db, "brek")
   useEffect (() => {
     const getFoods = async () => {
@@ -254,20 +283,6 @@ function App() {
     }
     getFoods()
   }, [])
-
-
-  // const docRef = doc(db, "food", "ucveXDjRCwRTetF0bU7xRya8V5x1")
-
-  // getDoc(docRef)
-  //   .then((doc) =>{
-  //     console.log(doc.data(), doc.id)
-  //   })
-
-
-
-
-
-
 
   return (
     <div className="App">
