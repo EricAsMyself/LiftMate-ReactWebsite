@@ -18,6 +18,8 @@
   }
 }
 
+
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -110,4 +112,163 @@ footer{
   padding-top: 20px;
   padding-bottom: 20px;
   background-color: lightcoral;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* THIS IS THE MOBILE VERSION PLEASE MAKE SURE YOU ARE CORRECTING THE RIGHT VERSION */
+@media (max-width: 480px) {
+  .App {
+    text-align: center;
+    /* background-color: #F1FAEE; */
+    background-image: url('assests/backgroundmobile.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 100%;
+  }
+  .loginimg{
+    content: url(assests/g.png);
+  }
+  
+  .App-logo {
+    height: 40vmin;
+    pointer-events: none;
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    .App-logo {
+      animation: App-logo-spin infinite 20s linear;
+    }
+  }
+  
+  .disapear{
+    display: none;
+  }
+  
+  .App-header {
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+  }
+  
+  .foodlayout{
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr 1fr;
+  }
+  .mealHolder{
+    width: 220%;
+    /* background-color: white; */
+  }
+  .meal{
+    grid-row: 2;
+    width: 100%;
+    opacity: 0.8;
+    background-color: #2E7376;
+    margin: 10%;
+    border-radius: 1em;
+  }
+  .date{
+    margin: auto;
+  }
+  .App-link {
+    color: #61dafb;
+  }
+  
+  @keyframes App-logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .basic{
+    display: grid;
+    grid-template-rows: 4em 4fr 1fr;
+    background-color: gray;
+  }
+  
+  
+  header{
+    background-color: #1D3557;
+    display: grid;
+    grid-template-columns: 1fr 10fr 1fr;
+  }
+  
+  #user{
+    grid-column: -1;
+    margin: auto;
+  }
+  .today{
+    background-color: #282c34;
+  }
+  .main{
+    display: grid;
+    grid-template-rows: 90px 1fr;
+    /* grid-template-columns: 1fr 10fr 1fr; */
+  }
+  
+  footer{
+    height: 10em;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 10fr;
+  }
+  .footeritems{
+    
+    align-content: center;
+    margin: auto;
+  }
+  
+  
+  .left{
+    height: 80px;
+    grid-column: 1/4;
+    grid-row: 1;
+    background-color: #457B9D;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  
+  .hoverButton{
+    border-top: 2px solid gray;
+    border-bottom: 2px solid gray;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    width: 80%;
+    margin: auto;
+    background-color: #F4A4AB;
+    /* display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr; */
+  }
+  .menuitemholder{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+  .menuItem{
+    grid-row: 1;
+    width: 100%;
+    border-top: 2px solid gray;
+    border-bottom: 2px solid gray;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    background-color: lightcoral;
+  }
+  .menuInput{
+    grid-row: 2;
+    width: 91%;
+  }
 }

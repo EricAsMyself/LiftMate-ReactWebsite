@@ -11,6 +11,8 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
+import newIcon from './assests/logo.ico';
+
 import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 import { addDoc, collection, getDocs, getFirestore, doc, deleteDoc, getDoc} from 'firebase/firestore';
@@ -56,16 +58,16 @@ const db = getFirestore(app);
 
 
 const intitialFoodsBrek = [
-  { id: 1, name: 'Name', cal: 'Calories' , amount: 'amount'},
+  { id: 0, name: 'Loading...', cal: 'Loading...' , amount: 'Loading...'},
 ];
 const intitialFoodsLun = [
-  { id: 1, name: 'Name', cal: 'Calories' , amount: 'amount'},
+  { id: 0, name: 'Loading...', cal: 'Loading...' , amount: 'Loading...'},
 ];
 const intitialFoodsDin = [
-  { id: 1, name: 'Name', cal: 'Calories' , amount: 'amount'},
+  { id: 0, name: 'Loading...', cal: 'Loading...' , amount: 'Loading...'},
 ];
 const intitialFoodsSnack = [
-  { id: 1, name: 'Name', cal: 'Calories' , amount: 'amount'},
+  { id: 0, name: 'Loading...', cal: 'Loading...' , amount: 'Loading...'},
 ];
 
 
@@ -83,7 +85,7 @@ function SignIn(){
      auth.signInWithPopup(provider);
   }
   return(
-    <button onClick={signInWithGoogle} id="user"> <img src={login} alt="google" height="50px" /></button>
+    <button onClick={signInWithGoogle} id="user"> <img src={login} alt="google" height="50px" className='loginimg'/></button>
   )
 }
 
@@ -149,9 +151,10 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
     foodSetSnack([ ...foodListSnack,  addedFood]);
   };
 
-  async function handleFood(addFunction,foodToAdd, meal) {
+  async function handleFood(addFunction,foodToAdd, meal,secondFunction) {
     let {cal, foodName} = await getCalories(foodToAdd);
     addFunction({ id: 2, name: foodName, cal: cal, amount: '1'}, meal)
+    secondFunction({ id: 2, name: foodName, cal: cal, amount: '1'})
   }
 
   
@@ -167,21 +170,21 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
   
 
   return(
-    <div>
-      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueBrek, "brek")}>Breakfast</button>
-                <input type="text" value={inputValueBrek} 
+    <div className='menuitemholder'>
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueBrek, "brek",addBreakfast)}>Breakfast</button>
+                <input className='menuInput' type="text" value={inputValueBrek} 
                 onChange={event => setInputValueBrek(event.target.value)}/>
 
-      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueLun, "lun")}>Lunch</button>
-      <input type="text" value={inputValueLun} 
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueLun, "lun",addLunch)}>Lunch</button>
+      <input className='menuInput' type="text" value={inputValueLun} 
                 onChange={event => setInputValueLun(event.target.value)}/>
 
-      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueDin, "din")}>Dinner</button>
-      <input type="text" value={inputValueDin} 
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueDin, "din",addDinner)}>Dinner</button>
+      <input className='menuInput' type="text" value={inputValueDin} 
                 onChange={event => setInputValueDin(event.target.value)}/>
 
-      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueSnack, "snack")}>Snack</button>
-      <input type="text" value={inputValueSnack} 
+      <button className='menuItem' onClick={() => handleFood(createFoods, inputValueSnack, "snack",addSnack)}>Snack</button>
+      <input className='menuInput' type="text" value={inputValueSnack} 
                 onChange={event => setInputValueSnack(event.target.value)}/>
     </div>
   )
@@ -190,6 +193,12 @@ function Menu ({foodListBrek, foodSetBrek, foodListLun, foodSetLun, foodListDin,
 
 
 function App() {
+  const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+  link.type = 'image/ico';
+  link.rel = 'shortcut icon';
+  link.href = newIcon;
+  document.getElementsByTagName('head')[0].appendChild(link);
+
   const [userId, setUserId] = useState(null);
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
@@ -199,7 +208,7 @@ function App() {
     }
 });
 
-console.log(userId)
+// console.log(userId)
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => {
@@ -264,7 +273,7 @@ console.log(userId)
     <div className="App">
     <header>
             <img height="60em" src={logo} alt="logo"/>
-            <h1>LiftMate</h1>
+            <h1 className='disapear'>LiftMate</h1>
             
             <h1 className='date'>Today</h1>
             <SignInFun />
@@ -279,7 +288,7 @@ console.log(userId)
       foodListDin={foodsDin} foodSetDin={setFoodsDin}
       foodListSnack={foodsSnack} foodSetSnack={setFoodsSnack}/> : <div></div>}
       </div>
-      <div >
+      <div className='mealHolder'>
         <Meal  meal="Breakfast" food_list={foodsBrek} meals="brek"/>
         <Meal meal="Lunch" food_list={foodsLun} meals="lun"/>
         <Meal meal="Dinner" food_list={foodsDin} meals="din"/>
