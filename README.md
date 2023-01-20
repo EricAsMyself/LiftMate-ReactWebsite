@@ -14,7 +14,7 @@ You can install the web app yourself by
 * Installing Node.js
 * Terminal over to the directory, and run ```npm start```
 
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video](https://youtu.be/wCiAMIw-o9c)
 
 # Web Pages
 
